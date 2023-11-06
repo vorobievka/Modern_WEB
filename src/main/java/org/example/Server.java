@@ -6,12 +6,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
 
+    public static final String GET = "GET";
+    public static final String POST = "POST";
+    final Set<String> allowedMethods = Set.of(GET, POST);
+
+
     static ExecutorService threadPool = Executors.newFixedThreadPool(64);
+    private static Handler handlerGET;
+    private static Handler defaultHandler;
 
     public static void listen(int port) {
         final var validPaths = List.of("/index.html", "/spring.svg", "/spring.png", "/resources.html", "/styles.css", "/app.js", "/links.html", "/forms.html", "/classic.html", "/events.html", "/events.js");
@@ -35,7 +43,23 @@ public class Server {
                 final var parts = requestLine.split(" ");
 
                 System.out.println("client connected");
-                System.out.println(requestLine);
+
+                Request request;
+
+                if(parts[1].split("\\?").length > 1){
+                    request = new Request(parts[0], parts[1], parts[1].split("\\?")[1]);
+                } else {
+                    request = new Request(parts[0], parts[1], "None");
+                }
+
+                if (parts[0].equals("GET") && parts[1].split("\\?")[0].equals("/messages")) {
+//                  System.out.println("Get Handler");
+                    System.out.println(request);
+                    handlerGET.handle(request, out);
+                    continue;
+                } else {
+                    defaultHandler.handle(request, out);
+                }
 
                 if (parts.length != 3) {
                     // just close socket
@@ -89,5 +113,14 @@ public class Server {
                 out.flush();
             }
         }
+    }
+
+    public void addHandler(String method, String path, Handler handler) {
+        if (method.equals("GET") && path.equals("/messages")) {
+            handlerGET = handler;
+        } else {
+            defaultHandler = handler;
+        }
+
     }
 }
