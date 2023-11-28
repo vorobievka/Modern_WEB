@@ -2,6 +2,9 @@ package org.example;
 
 import java.io.*;
 import java.net.ServerSocket;
+//import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -9,6 +12,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+
 
 public class Server {
 
@@ -40,21 +47,23 @@ public class Server {
                 // read only request line for simplicity
                 // must be in form GET /path HTTP/1.1
                 final var requestLine = in.readLine();
+//                System.out.println(requestLine);
+
                 final var parts = requestLine.split(" ");
 
                 System.out.println("client connected");
 
                 Request request;
 
-                if(parts[1].split("\\?").length > 1){
-                    request = new Request(parts[0], parts[1], parts[1].split("\\?")[1]);
+                if (parts[1].split("\\?").length > 1) {
+                    request = new Request(parts[0], parts[1]);
                 } else {
-                    request = new Request(parts[0], parts[1], "None");
+                    request = new Request(parts[0], "");
                 }
 
                 if (parts[0].equals("GET") && parts[1].split("\\?")[0].equals("/messages")) {
 //                  System.out.println("Get Handler");
-                    System.out.println(request);
+//                  System.out.println(request);
                     handlerGET.handle(request, out);
                     continue;
                 } else {
@@ -111,8 +120,11 @@ public class Server {
                 ).getBytes());
                 Files.copy(filePath, out);
                 out.flush();
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
             }
         }
+
     }
 
     public void addHandler(String method, String path, Handler handler) {

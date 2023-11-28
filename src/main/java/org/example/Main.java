@@ -8,22 +8,21 @@ import java.nio.file.Path;
 public class Main {
     public static void main(String[] args) {
         final var server = new Server();
-//        server.listen(9999);
 
         server.addHandler("GET", "/messages", new Handler() {
             @Override
             public void handle(Request request, BufferedOutputStream out) throws IOException {
                 // TODO: handlers code
-//              System.out.println("Hello, from GET handler!");
+
                 final var filePath = Path.of(".", "public", "GET.html");
-//                System.out.println(filePath);
+
                 final var mimeType = Files.probeContentType(filePath);
-//                System.out.println(mimeType);
+
                 final var template = Files.readString(filePath);
-//                System.out.println(content.length);
+
                 final var content = template.replace(
                         "{param}",
-                        request.param
+                        request.toString()
                 ).getBytes();
                 out.write((
                         "HTTP/1.1 200 OK\r\n" +
