@@ -33,7 +33,10 @@ public class Main {
                 ).getBytes());
                 out.write(content);
                 out.flush();
+
+                System.out.println("Parameter last equals " + request.getParts().get("last"));
             }
+
         });
 
         server.addHandler("", "", new Handler() {
@@ -49,6 +52,7 @@ public class Main {
                 out.flush();
             }
         });
+
 
 //        server.addHandler("POST", "/messages", new Handler() {
 //            public void handle(Request request, BufferedOutputStream responseStream) {

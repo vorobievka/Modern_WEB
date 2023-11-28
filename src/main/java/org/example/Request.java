@@ -7,14 +7,17 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Request {
-    String method;
-    String path;
-    String bodyBytes;
-    String paramstLine;
-    List<NameValuePair> params;
+    private String method;
+    private String path;
+    private String bodyBytes;
+    private String paramstLine;
+    private List<NameValuePair> params;
+    private Map<String,String> paramsMap = new HashMap<>();
 
     public Request(String method, String path) throws URISyntaxException {
         this.method = method;
@@ -29,8 +32,11 @@ public class Request {
         this.params = URLEncodedUtils.parse(new URI(path), "UTF-8");
     }
 
-    public List<NameValuePair> getParts() {
-        return params;
+    public Map<String, String> getParts() {
+        for (NameValuePair element : params) {
+             paramsMap.put(element.getName(), element.getValue());
+        }
+        return paramsMap;
     }
 
     public String getQueryParam(String name) {
